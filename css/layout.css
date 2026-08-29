@@ -1,0 +1,154 @@
+/* layout.css — impalcatura delle schermate */
+
+.app {
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 44px) clamp(14px, 4vw, 28px) 56px;
+}
+
+.screen {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.4vw, 24px);
+  animation: screen-in 0.32s ease both;
+}
+
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ───────────────────────────────────────────────────────────────── Home */
+
+.screen-home { justify-content: center; }
+
+.home-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(18px, 3vw, 26px);
+  text-align: center;
+  padding-top: clamp(8px, 5vh, 48px);
+}
+
+.logo {
+  font-family: var(--serif);
+  font-size: clamp(2.4rem, 9vw, 3.6rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.logo span { color: var(--gold); }
+
+.tagline {
+  color: var(--text-dim);
+  max-width: 44ch;
+  font-size: clamp(0.95rem, 2.4vw, 1.05rem);
+}
+.tagline strong { color: var(--text); }
+
+.modes {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.home-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.rules {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+  max-width: 460px;
+  width: 100%;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+  color: var(--text-dim);
+  font-size: 0.88rem;
+}
+.rules li { padding-left: 18px; position: relative; }
+.rules li::before {
+  content: "";
+  position: absolute;
+  left: 2px; top: 0.62em;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.rules strong { color: var(--text); font-weight: 600; }
+
+/* ──────────────────────────────────────────────────────────────── Round */
+
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.hud-item strong { color: var(--text); font-size: 1rem; }
+.hud-sep { opacity: 0.5; margin: 0 1px; }
+.hud-right { text-align: right; }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+.actions .btn-primary { flex: 1; }
+.actions-center { justify-content: center; flex-wrap: wrap; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* ──────────────────────────────────────────────────────────── Risultati */
+
+.screen-results { text-align: center; align-items: center; }
+
+.results-label {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+.final-score {
+  font-size: clamp(3.4rem, 15vw, 5.2rem);
+  line-height: 1;
+  color: var(--gold);
+}
+.final-max {
+  font-size: 0.32em;
+  color: var(--text-faint);
+  margin-left: 4px;
+}
+
+.final-title { font-size: 1.3rem; }
+.final-text { color: var(--text-dim); max-width: 40ch; }
+
+.recap { width: 100%; display: grid; gap: 8px; text-align: left; }
+
+@media (max-width: 460px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stat-points { grid-column: 1 / -1; }
+  .controls { flex-direction: column; align-items: stretch; }
+}

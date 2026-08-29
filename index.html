@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IndovinaQuando — indovina l'anno dell'evento storico</title>
+  <meta name="description" content="Gioco a cinque round: leggi un evento storico e indovina in che anno è successo. Fino a 100 punti a round, 500 a partita.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══════════════════════════════════════════════════════ Schermata iniziale -->
+  <section class="screen screen-home" id="screen-home">
+    <div class="home-inner">
+      <h1 class="logo">Indovina<span>Quando</span></h1>
+      <p class="tagline">
+        Cinque eventi storici, cinque anni da azzeccare.<br>
+        Più ti avvicini, più punti prendi: fino a <strong>100</strong> a round,
+        <strong>500</strong> a partita.
+      </p>
+
+      <div class="modes" id="mode-list" role="radiogroup" aria-label="Livello di difficoltà"></div>
+
+      <button class="btn btn-primary btn-big" id="btn-start">Inizia partita</button>
+
+      <div class="home-meta">
+        <p class="meta-line" id="fresh-count"></p>
+        <p class="meta-line" id="best-line"></p>
+        <button class="btn-link" id="btn-reset" type="button">Azzera gli eventi già visti</button>
+      </div>
+
+      <ul class="rules">
+        <li><strong>Anno esatto</strong> vale 100 punti pieni.</li>
+        <li>Il margine di errore si allarga per gli eventi più antichi.</li>
+        <li>L'<strong>indizio</strong> svela il secolo, ma taglia il round a 75 punti.</li>
+        <li>Gli eventi già usciti non tornano finché non li hai visti tutti.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════ Round in corso -->
+  <section class="screen screen-round" id="screen-round" hidden>
+    <header class="hud">
+      <span class="hud-item">Round <strong id="round-index">1</strong><span class="hud-sep">/</span><span id="round-total-count">5</span></span>
+      <span class="hud-badge" id="round-mode">Medio</span>
+      <span class="hud-item hud-right"><strong id="round-score">0</strong> punti</span>
+    </header>
+
+    <div class="dots" id="round-dots" aria-hidden="true"></div>
+
+    <article class="event-card">
+      <span class="chip" id="event-cat">Storia</span>
+      <h2 class="event-text" id="event-text"></h2>
+      <p class="hint-line" id="hint-line" hidden></p>
+    </article>
+
+    <section class="panel" aria-label="Inserisci l'anno">
+      <output class="guess" id="guess-year">1800</output>
+
+      <div class="slider-wrap">
+        <input class="slider" type="range" id="year-slider"
+               min="0" max="1000" step="1" value="500"
+               aria-label="Trascina per scegliere l'anno">
+        <div class="ticks" id="slider-ticks" aria-hidden="true"></div>
+      </div>
+
+      <div class="controls">
+        <div class="nudges" role="group" aria-label="Correggi l'anno">
+          <button class="btn-nudge" type="button" data-delta="-100">−100</button>
+          <button class="btn-nudge" type="button" data-delta="-10">−10</button>
+          <button class="btn-nudge" type="button" data-delta="-1">−1</button>
+          <button class="btn-nudge" type="button" data-delta="1">+1</button>
+          <button class="btn-nudge" type="button" data-delta="10">+10</button>
+          <button class="btn-nudge" type="button" data-delta="100">+100</button>
+        </div>
+
+        <div class="exact">
+          <label class="exact-label" for="year-input">Anno esatto</label>
+          <input class="year-input" type="number" id="year-input" inputmode="numeric" step="1">
+          <select class="era-select" id="year-era" aria-label="Era" hidden>
+            <option value="1">d.C.</option>
+            <option value="-1">a.C.</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="jumps" id="year-jumps" role="group" aria-label="Salta a un'epoca"></div>
+
+      <div class="actions">
+        <button class="btn btn-ghost" type="button" id="btn-hint">Indizio</button>
+        <button class="btn btn-primary" type="button" id="btn-confirm">Conferma l'anno</button>
+      </div>
+      <p class="keyhint">Frecce ← → per un anno, con Maiusc per dieci, Invio per confermare.</p>
+    </section>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ Rivelazione -->
+  <section class="screen screen-reveal" id="screen-reveal" hidden>
+    <header class="hud">
+      <span class="hud-item">Round <strong id="reveal-index">1</strong><span class="hud-sep">/</span>5</span>
+      <span class="hud-badge" id="reveal-verdict">Molto vicino</span>
+      <span class="hud-item hud-right"><strong id="reveal-total">0</strong> punti</span>
+    </header>
+
+    <div class="reveal-block">
+      <p class="reveal-label">L'evento è del</p>
+      <p class="reveal-year" id="reveal-year">1969</p>
+      <p class="reveal-event" id="reveal-event"></p>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-track">
+        <div class="tl-band" id="tl-band"></div>
+        <div class="tl-marker tl-guess" id="tl-guess"><span class="tl-tag" id="tl-guess-tag"></span></div>
+        <div class="tl-marker tl-actual" id="tl-actual"><span class="tl-tag" id="tl-actual-tag"></span></div>
+      </div>
+      <div class="tl-scale">
+        <span id="tl-min"></span>
+        <span id="tl-max"></span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">La tua risposta</span>
+        <span class="stat-value" id="stat-guess">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Scarto</span>
+        <span class="stat-value" id="stat-gap">—</span>
+      </div>
+      <div class="stat stat-points">
+        <span class="stat-label">Punti del round</span>
+        <span class="stat-value" id="stat-points">0</span>
+      </div>
+    </div>
+
+    <div class="score-bar"><span class="score-fill" id="score-fill"></span></div>
+    <p class="hint-used" id="hint-used" hidden>Indizio usato: massimo 75 punti su questo round.</p>
+
+    <p class="note" id="reveal-note"></p>
+
+    <div class="actions actions-center">
+      <button class="btn btn-primary" type="button" id="btn-next">Prossimo round</button>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════════════════════════════════════ Risultati -->
+  <section class="screen screen-results" id="screen-results" hidden>
+    <p class="results-label">Partita finita</p>
+    <p class="final-score"><span id="final-points">0</span><span class="final-max">/500</span></p>
+    <h2 class="final-title" id="final-title">Buon conoscitore</h2>
+    <p class="final-text" id="final-text"></p>
+    <p class="record" id="final-record" hidden>Nuovo record personale!</p>
+
+    <ol class="recap" id="recap"></ol>
+
+    <div class="actions actions-center">
+      <button class="btn btn-primary" type="button" id="btn-again">Gioca ancora</button>
+      <button class="btn btn-ghost" type="button" id="btn-home">Cambia difficoltà</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="data/events.js"></script>
+<script src="js/config.js"></script>
+<script src="js/scale.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/deck.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

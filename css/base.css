@@ -1,0 +1,80 @@
+/* base.css — reset, variabili, tipografia, sfondo */
+
+:root {
+  /* superfici */
+  --ink:        #0c1018;
+  --ink-2:      #131926;
+  --surface:    #182034;
+  --surface-2:  #1f293f;
+  --line:       #2c3852;
+
+  /* testo */
+  --text:       #e8ecf4;
+  --text-dim:   #9aa6bd;
+  --text-faint: #6b7690;
+
+  /* accenti */
+  --gold:       #e3ab5c;
+  --gold-soft:  #f2cd93;
+  --gold-dim:   rgba(227, 171, 92, 0.16);
+  --green:      #63c68a;
+  --red:        #e2705f;
+  --blue:       #6ea8e6;
+
+  --radius:     14px;
+  --radius-sm:  9px;
+  --shadow:     0 18px 44px rgba(0, 0, 0, 0.45);
+
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--ink);
+  background-image:
+    radial-gradient(1100px 620px at 50% -12%, rgba(227, 171, 92, 0.13), transparent 62%),
+    radial-gradient(760px 520px at 8% 108%, rgba(110, 168, 230, 0.10), transparent 60%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { margin: 0; font-weight: 600; line-height: 1.2; }
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+button, input, select { font: inherit; color: inherit; }
+
+[hidden] { display: none !important; }
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection { background: var(--gold-dim); }
+
+/* I numeri degli anni sono l'elemento tipografico principale del gioco. */
+.guess, .reveal-year, .final-score, .tl-tag, .stat-value, .recap-year {
+  font-family: var(--serif);
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
