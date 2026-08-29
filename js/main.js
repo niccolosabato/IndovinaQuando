@@ -20,6 +20,7 @@
     usedHint: false,
     rounds: [],
     total: 0,
+    theme: 'notte',    // notte | carta
     phase: 'home'      // home | round | reveal | results
   };
 
@@ -55,7 +56,7 @@
     state.rounds = [];
     state.total = 0;
 
-    UI.setupControls(state.scale, state.mode, setGuess);
+    UI.setupControls(state.scale);
     startRound();
   }
 
@@ -186,6 +187,12 @@
       UI.renderHomeMeta(state.mode);
     });
 
+    el['btn-theme'].addEventListener('click', function () {
+      state.theme = state.theme === 'carta' ? 'notte' : 'carta';
+      IQ.Storage.saveTheme(state.theme);
+      UI.applyTheme(state.theme);
+    });
+
     el['year-slider'].addEventListener('input', function () {
       setGuess(state.scale.toYear(Number(this.value) / 1000));
     });
@@ -224,6 +231,8 @@
 
   function init() {
     UI.init();
+    state.theme = IQ.Storage.theme();
+    UI.applyTheme(state.theme);
     state.mode = Cfg.mode(state.modeId);
     state.scale = Scale.create(state.mode.segments);
     bind();

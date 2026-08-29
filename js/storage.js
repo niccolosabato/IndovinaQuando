@@ -11,6 +11,7 @@
 
   var SEEN_KEY = 'iq.seen';
   var BEST_KEY = 'iq.best';
+  var THEME_KEY = 'iq.theme';
   var SEEN_MAX = 3000;
 
   function read(key, fallback) {
@@ -66,6 +67,16 @@
 
     resetSeen: function () {
       write(SEEN_KEY, []);
+    },
+
+    /* 'notte' (predefinito) oppure 'carta'. Lo legge anche lo script nel head
+     * di index.html, che deve restare allineato a questa chiave. */
+    theme: function () {
+      return read(THEME_KEY, 'notte') === 'carta' ? 'carta' : 'notte';
+    },
+
+    saveTheme: function (name) {
+      write(THEME_KEY, name);
     },
 
     best: function (modeId) {

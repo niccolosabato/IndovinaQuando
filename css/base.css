@@ -1,34 +1,61 @@
-/* base.css — reset, variabili, tipografia, sfondo */
+/* base.css — i due temi, i caratteri, il reset.
+ *
+ * Il gioco è impaginato come la pagina di una cronaca, letta in due luci: di
+ * sera a lume di candela (tema "notte", il predefinito) o di giorno su carta
+ * (tema "carta"). Cambia l'illuminazione, non l'impaginato — i ruoli dei colori
+ * restano gli stessi nei due temi:
+ *
+ *   --quill  quello che scrive il giocatore: l'anno mentre lo cerca
+ *   --seal   quello che dice la storia: l'anno vero, il punteggio finale
+ *
+ * Il tema si sceglie da un interruttore in home e finisce in localStorage; il
+ * predefinito è la notte, indipendentemente dal tema di sistema.
+ */
 
 :root {
-  /* superfici */
-  --ink:        #0c1018;
-  --ink-2:      #131926;
-  --surface:    #182034;
-  --surface-2:  #1f293f;
-  --line:       #2c3852;
+  --bg:        #16130f;   /* notte calda, non blu */
+  --rule:      #3a3229;   /* filetti: separano senza riquadrare */
 
-  /* testo */
-  --text:       #e8ecf4;
-  --text-dim:   #9aa6bd;
-  --text-faint: #6b7690;
+  --fg:        #ece2cd;   /* pergamena */
+  --fg-dim:    #b3a68f;
+  --fg-faint:  #948673;   /* etichette di servizio (5,2:1) */
 
-  /* accenti */
-  --gold:       #e3ab5c;
-  --gold-soft:  #f2cd93;
-  --gold-dim:   rgba(227, 171, 92, 0.16);
-  --green:      #63c68a;
-  --red:        #e2705f;
-  --blue:       #6ea8e6;
+  --quill:     #c09553;   /* ottone */
+  --seal:      #cf6a52;   /* ceralacca, schiarita per reggere il fondo scuro */
 
-  --radius:     14px;
-  --radius-sm:  9px;
-  --shadow:     0 18px 44px rgba(0, 0, 0, 0.45);
+  /* Il bottone principale è un blocco pieno: sul fondo scuro la pergamena piena
+     abbaglierebbe, quindi si spegne di un tono e si accende al passaggio. */
+  --btn-bg:    #d6c9ae;
+  --btn-fg:    #16130f;
+  --btn-hover: #ece2cd;
+  --grain:     0.55;
 
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --radius:    8px;
+  --radius-sm: 6px;
+
+  --sans: "Alegreya Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: "EB Garamond", Georgia, "Liberation Serif", "Times New Roman", serif;
 
   color-scheme: dark;
+}
+
+:root[data-theme="carta"] {
+  --bg:        #f5efe2;
+  --rule:      #cdbfa8;
+
+  --fg:        #2a201a;
+  --fg-dim:    #5e4f42;
+  --fg-faint:  #786655;   /* 4,8:1 sulla carta */
+
+  --quill:     #6d523a;   /* seppia */
+  --seal:      #8f2f22;   /* ceralacca */
+
+  --btn-bg:    #2a201a;
+  --btn-fg:    #f5efe2;
+  --btn-hover: #3b2d24;
+  --grain:     0.5;
+
+  color-scheme: light;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -40,13 +67,20 @@ body {
   font-family: var(--sans);
   font-size: 16px;
   line-height: 1.55;
-  color: var(--text);
-  background: var(--ink);
-  background-image:
-    radial-gradient(1100px 620px at 50% -12%, rgba(227, 171, 92, 0.13), transparent 62%),
-    radial-gradient(760px 520px at 8% 108%, rgba(110, 168, 230, 0.10), transparent 60%);
-  background-attachment: fixed;
+  color: var(--fg);
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Grana della carta: appena percettibile, giusto per togliere alla pagina
+   l'aspetto di fondo digitale. Una regola sola, facile da cancellare. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
 h1, h2, h3 { margin: 0; font-weight: 600; line-height: 1.2; }
@@ -58,18 +92,25 @@ button, input, select { font: inherit; color: inherit; }
 [hidden] { display: none !important; }
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--seal);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
-::selection { background: var(--gold-dim); }
+::selection { background: rgba(207, 106, 82, 0.22); }
 
-/* I numeri degli anni sono l'elemento tipografico principale del gioco. */
-.guess, .reveal-year, .final-score, .tl-tag, .stat-value, .recap-year {
+/* Gli anni sono l'elemento tipografico principale del gioco: qui il serif non è
+   decorazione, è la gerarchia. Le cifre di Garamond sono oldstyle e di larghezza
+   variabile, e l'anno salterebbe a ogni pixel di slider: si chiedono allineate. */
+.guess, .reveal-year, .final-score, .tl-tag, .recap-year {
   font-family: var(--serif);
   font-variant-numeric: lining-nums tabular-nums;
   letter-spacing: -0.01em;
+}
+
+/* Etichette di servizio: piccole, spaziate, mai protagoniste. */
+.hud, .reveal-label, .results-label, .exact-label, .ticks, .tl-scale {
+  font-family: var(--sans);
 }
 
 @media (prefers-reduced-motion: reduce) {

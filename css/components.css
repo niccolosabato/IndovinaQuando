@@ -1,4 +1,8 @@
-/* components.css — bottoni, slider, card, timeline, riepilogo */
+/* components.css — bottoni, slider, evento, timeline, riepilogo.
+ *
+ * Regola di fondo: niente superfici. Dove serve separare due cose si tira un
+ * filetto da 1px, non si disegna un riquadro.
+ */
 
 /* ────────────────────────────────────────────────────────────── Bottoni */
 
@@ -9,138 +13,98 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.btn:active { transform: translateY(1px); }
 
 .btn-primary {
-  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
-  color: #2a1c07;
-  box-shadow: 0 8px 22px rgba(227, 171, 92, 0.22);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
 }
-.btn-primary:hover { background: var(--gold-soft); }
+.btn-primary:hover { background: var(--btn-hover); }
+.btn-primary:disabled { background: var(--rule); color: var(--fg-faint); cursor: default; }
+.btn-primary:hover:disabled { background: var(--rule); }
 
 .btn-ghost {
-  background: transparent;
-  border-color: var(--line);
-  color: var(--text-dim);
+  background: none;
+  border-color: var(--rule);
+  color: var(--fg-dim);
 }
-.btn-ghost:hover { border-color: var(--gold); color: var(--text); }
-.btn-ghost:disabled { opacity: 0.4; cursor: default; border-color: var(--line); color: var(--text-faint); }
+.btn-ghost:hover { border-color: var(--fg-faint); color: var(--fg); }
+.btn-ghost:disabled { opacity: 0.45; cursor: default; border-color: var(--rule); color: var(--fg-faint); }
 
-.btn-big { padding: 15px 42px; font-size: 1.05rem; }
+.btn-big { padding: 14px 40px; font-size: 1rem; }
 
 .btn-link {
   background: none;
   border: 0;
   padding: 2px;
-  color: var(--text-faint);
+  color: var(--fg-faint);
   font-size: 0.82rem;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
 }
-.btn-link:hover { color: var(--gold); }
+.btn-link:hover { color: var(--quill); }
 
-.meta-line { font-size: 0.85rem; color: var(--text-dim); }
-.meta-line strong { color: var(--gold); }
+.meta-line { font-size: 0.85rem; color: var(--fg-dim); }
+.meta-line strong { color: var(--quill); font-weight: 600; }
 
 /* ────────────────────────────────────────────────── Scelta difficoltà */
 
-.mode-card {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
-  gap: 12px;
-  text-align: left;
-  width: 100%;
-  padding: 13px 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  color: inherit;
+.modes {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.mode-item {
+  background: none;
+  border: 0;
+  padding: 4px 10px;
+  color: var(--fg-faint);
+  font-size: 1rem;
   cursor: pointer;
-  transition: border-color 0.18s ease, background 0.18s ease;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
-.mode-card:hover { border-color: var(--text-faint); }
-.mode-card[aria-checked="true"] {
-  border-color: var(--gold);
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
-}
-
-.mode-dot {
-  width: 15px; height: 15px;
-  margin-top: 5px;
-  border-radius: 50%;
-  border: 2px solid var(--text-faint);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-.mode-card[aria-checked="true"] .mode-dot {
-  border-color: var(--gold);
-  box-shadow: inset 0 0 0 3px var(--gold);
+.mode-item:hover { color: var(--fg-dim); }
+.mode-item[aria-checked="true"] {
+  color: var(--quill);
+  border-bottom-color: var(--quill);
 }
 
-.mode-name { font-weight: 600; }
-.mode-blurb { font-size: 0.84rem; color: var(--text-dim); }
-
-/* ───────────────────────────────────────────────────── Card dell'evento */
-
-.dots { display: flex; gap: 6px; }
-.dot {
-  flex: 1;
-  height: 4px;
-  border-radius: 99px;
-  background: var(--line);
-  transition: background 0.3s ease;
-}
-.dot.is-done { background: var(--gold); }
-.dot.is-current { background: var(--gold-soft); }
-
-.event-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: clamp(20px, 4vw, 30px);
-  box-shadow: var(--shadow);
-  display: grid;
-  gap: 14px;
-  justify-items: start;
+/* Una riga sola, che segue la voce selezionata. */
+.mode-blurb {
+  font-size: 0.86rem;
+  color: var(--fg-dim);
+  max-width: 40ch;
+  margin-top: -14px;
+  text-wrap: balance;
 }
 
-.chip {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-weight: 600;
-  color: var(--gold);
-  background: var(--gold-dim);
-  border-radius: 99px;
-  padding: 4px 11px;
-}
+/* ─────────────────────────────────────────────────────── Testo dell'evento */
 
 .event-text {
   font-family: var(--serif);
-  font-size: clamp(1.25rem, 4.2vw, 1.7rem);
+  font-size: clamp(1.55rem, 5.4vw, 2.3rem);
   font-weight: 400;
-  line-height: 1.32;
+  line-height: 1.28;
 }
 
 .hint-line {
   font-size: 0.88rem;
-  color: var(--gold-soft);
-  border-left: 2px solid var(--gold);
-  padding-left: 10px;
+  color: var(--quill);
 }
 
 /* ───────────────────────────────────────────────── Pannello di risposta */
 
+/* Doppio filetto: una riga più la sua ombra netta tre pixel sotto. */
 .panel {
-  background: var(--ink-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: clamp(18px, 3.6vw, 26px);
+  border-top: 1px solid var(--rule);
+  box-shadow: 0 3px 0 -2px var(--rule);
+  padding-top: clamp(22px, 3.6vw, 30px);
   display: grid;
-  gap: 18px;
+  gap: 20px;
 }
 
 .guess {
@@ -148,7 +112,7 @@
   text-align: center;
   font-size: clamp(2.6rem, 11vw, 3.4rem);
   line-height: 1;
-  color: var(--gold);
+  color: var(--quill);
 }
 
 /* Slider ------------------------------------------------------------- */
@@ -165,30 +129,26 @@
   margin: 0;
 }
 .slider::-webkit-slider-runnable-track {
-  height: 6px;
-  border-radius: 99px;
-  background: linear-gradient(90deg, var(--line), var(--surface-2));
+  height: 2px;
+  background: var(--rule);
 }
 .slider::-moz-range-track {
-  height: 6px;
-  border-radius: 99px;
-  background: linear-gradient(90deg, var(--line), var(--surface-2));
+  height: 2px;
+  background: var(--rule);
 }
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 26px; height: 26px;
-  margin-top: -10px;
+  width: 20px; height: 20px;
+  margin-top: -9px;
   border-radius: 50%;
-  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
-  border: 3px solid var(--ink-2);
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
+  background: var(--quill);
+  border: 0;
 }
 .slider::-moz-range-thumb {
   width: 20px; height: 20px;
   border-radius: 50%;
-  background: var(--gold);
-  border: 3px solid var(--ink-2);
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
+  background: var(--quill);
+  border: 0;
 }
 
 /* Le tacche sono posizionate in valore assoluto da ui.js, così cadono davvero
@@ -197,7 +157,7 @@
   position: relative;
   height: 15px;
   font-size: 0.68rem;
-  color: var(--text-faint);
+  color: var(--fg-faint);
   font-variant-numeric: tabular-nums;
 }
 .ticks span {
@@ -215,57 +175,37 @@
 .nudges { display: flex; gap: 6px; flex-wrap: wrap; }
 
 .btn-nudge {
-  min-width: 48px;
-  padding: 9px 10px;
-  border: 1px solid var(--line);
+  min-width: 46px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text-dim);
+  background: none;
+  color: var(--fg-dim);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
-.btn-nudge:hover { border-color: var(--gold); color: var(--text); }
-.btn-nudge:active { background: var(--surface-2); }
+.btn-nudge:hover { border-color: var(--fg-faint); color: var(--fg); }
 
 .exact { display: grid; grid-template-columns: auto auto; gap: 6px; align-items: center; }
 .exact-label {
   grid-column: 1 / -1;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-faint);
+  letter-spacing: 0.14em;
+  color: var(--fg-faint);
 }
 
 .year-input, .era-select {
-  padding: 9px 10px;
-  border: 1px solid var(--line);
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
-  background: var(--surface);
+  background: none;
   font-variant-numeric: tabular-nums;
 }
-.year-input { width: 100px; text-align: center; font-size: 1rem; }
+.year-input { width: 96px; text-align: center; font-size: 1rem; }
 .era-select { cursor: pointer; }
-
-.jumps { display: flex; gap: 6px; flex-wrap: wrap; }
-.btn-jump {
-  padding: 6px 12px;
-  border: 1px dashed var(--line);
-  border-radius: 99px;
-  background: transparent;
-  color: var(--text-faint);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-.btn-jump:hover { color: var(--gold); border-color: var(--gold); }
-
-.keyhint {
-  font-size: 0.76rem;
-  color: var(--text-faint);
-  text-align: center;
-}
 
 /* ─────────────────────────────────────────────────────────  Rivelazione */
 
@@ -273,24 +213,19 @@
 
 .reveal-label {
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.72rem;
-  color: var(--text-faint);
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  color: var(--fg-faint);
 }
 .reveal-year {
   font-size: clamp(3rem, 13vw, 4.4rem);
   line-height: 1;
-  color: var(--gold);
-  animation: pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both;
-}
-@keyframes pop {
-  from { opacity: 0; transform: scale(0.82); }
-  to   { opacity: 1; transform: none; }
+  color: var(--seal);
 }
 .reveal-event {
   font-family: var(--serif);
   font-size: 1.05rem;
-  color: var(--text-dim);
+  color: var(--fg-dim);
   max-width: 46ch;
   margin: 4px auto 0;
 }
@@ -301,135 +236,108 @@
 
 .tl-track {
   position: relative;
-  height: 6px;
+  height: 2px;
   margin: 34px 4px 0;
-  border-radius: 99px;
-  background: var(--surface-2);
+  background: var(--rule);
 }
 
+/* La distanza fra risposta e anno vero: senza colori d'allarme resta il tratto,
+   che è già l'informazione. */
 .tl-band {
   position: absolute;
   top: 0; bottom: 0;
-  border-radius: 99px;
-  background: linear-gradient(90deg, var(--red), var(--gold));
-  opacity: 0.55;
-  transition: left 0.5s ease, width 0.5s ease;
+  background: var(--fg-faint);
+  transition: left 0.4s ease, width 0.4s ease;
 }
 
 .tl-marker {
   position: absolute;
   top: 50%;
   width: 2px;
-  height: 22px;
+  height: 20px;
   margin-left: -1px;
   transform: translateY(-50%);
-  transition: left 0.5s ease;
+  transition: left 0.4s ease;
 }
-.tl-guess { background: var(--blue); }
-.tl-actual { background: var(--green); }
+.tl-guess { background: var(--fg-dim); }
+.tl-actual { background: var(--seal); }
 
 .tl-tag {
   position: absolute;
-  bottom: 26px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 0.78rem;
-  padding: 2px 8px;
-  border-radius: 99px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  font-size: 0.82rem;
 }
-.tl-guess .tl-tag { color: var(--blue); }
-.tl-actual .tl-tag { bottom: auto; top: 26px; color: var(--green); }
+.tl-guess .tl-tag { color: var(--fg-dim); }
+.tl-actual .tl-tag { bottom: auto; top: 24px; color: var(--seal); }
 
 .tl-scale {
   display: flex;
   justify-content: space-between;
   margin-top: 26px;
   font-size: 0.68rem;
-  color: var(--text-faint);
+  color: var(--fg-faint);
 }
 
-/* Statistiche del round ------------------------------------------------ */
+/* Esito del round ------------------------------------------------------ */
 
-.stat {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 12px;
+/* Verdetto, risposta, scarto e punti: una riga sola al posto di tre riquadri. */
+.reveal-stats {
   text-align: center;
-  display: grid;
-  gap: 2px;
+  color: var(--fg-dim);
+  font-size: 0.95rem;
 }
-.stat-label {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-faint);
-}
-.stat-value { font-size: 1.35rem; }
-.stat-points { border-color: var(--gold); }
-.stat-points .stat-value { color: var(--gold); }
-
-.score-bar {
-  height: 8px;
-  border-radius: 99px;
-  background: var(--surface-2);
-  overflow: hidden;
-}
-.score-fill {
-  display: block;
-  height: 100%;
-  width: 0;
-  border-radius: 99px;
-  background: linear-gradient(90deg, var(--gold), var(--gold-soft));
-  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-}
+.reveal-stats strong { color: var(--fg); font-weight: 600; }
+.reveal-stats .points { color: var(--quill); font-weight: 600; }
+/* Zero punti in oro sembrerebbe un premio. */
+.reveal-stats .points.is-zero { color: var(--fg-faint); }
 
 .hint-used, .note {
   font-size: 0.88rem;
-  color: var(--text-dim);
+  color: var(--fg-dim);
   text-align: center;
 }
 .note {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--gold);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  text-align: left;
+  max-width: 52ch;
+  margin: 0 auto;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  text-wrap: balance;
 }
-.hint-used { color: var(--gold-soft); }
+.hint-used { color: var(--quill); }
 
 /* ───────────────────────────────────────────────────────────  Riepilogo */
 
 .record {
-  color: var(--green);
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--quill);
+  font-size: 1.05rem;
 }
 
 .recap-row {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 4px 14px;
+  gap: 2px 16px;
   align-items: center;
-  padding: 11px 14px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  padding: 12px 0;
+  border-top: 1px solid var(--rule);
 }
-.recap-text { font-size: 0.9rem; }
-.recap-years { font-size: 0.78rem; color: var(--text-dim); }
-.recap-years b { color: var(--text); font-weight: 600; }
+.recap-text { font-family: var(--serif); font-size: 1.02rem; }
+.recap-years { font-size: 0.78rem; color: var(--fg-faint); }
+.recap-years b { color: var(--fg-dim); font-weight: 600; }
 .recap-points {
   grid-row: 1 / span 2;
   grid-column: 2;
   font-family: var(--serif);
-  font-size: 1.5rem;
-  color: var(--gold);
+  font-size: 1.4rem;
+  color: var(--quill);
   text-align: right;
   min-width: 3ch;
 }
-.recap-row.is-zero .recap-points { color: var(--text-faint); }
+.recap-row.is-zero .recap-points { color: var(--fg-faint); }
+/* L'elenco si chiude con un filetto come quelli che separano le righe. */
+.recap-row:last-child { border-bottom: 1px solid var(--rule); }

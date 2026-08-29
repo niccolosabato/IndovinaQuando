@@ -6,9 +6,22 @@
   <title>IndovinaQuando — indovina l'anno dell'evento storico</title>
   <meta name="description" content="Gioco a cinque round: leggi un evento storico e indovina in che anno è successo. Fino a 100 punti a round, 500 a partita.">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <meta name="theme-color" content="#16130f" id="theme-color">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans:wght@400;500&display=swap">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
+  <script>
+    /* L'unico script nel head, e deve restarci: applica il tema salvato prima
+       del primo disegno. Spostato in fondo alla pagina come gli altri, chi ha
+       scelto la carta vedrebbe un lampo di notte a ogni caricamento. */
+    try {
+      var t = localStorage.getItem('iq.theme');
+      if (t === '"carta"' || t === 'carta') document.documentElement.dataset.theme = 'carta';
+    } catch (e) {}
+  </script>
 </head>
 <body>
 
@@ -19,12 +32,12 @@
     <div class="home-inner">
       <h1 class="logo">Indovina<span>Quando</span></h1>
       <p class="tagline">
-        Cinque eventi storici, cinque anni da azzeccare.<br>
-        Più ti avvicini, più punti prendi: fino a <strong>100</strong> a round,
-        <strong>500</strong> a partita.
+        Cinque eventi storici, cinque anni da azzeccare.
+        Più ti avvicini, più punti prendi.
       </p>
 
       <div class="modes" id="mode-list" role="radiogroup" aria-label="Livello di difficoltà"></div>
+      <p class="mode-blurb" id="mode-blurb"></p>
 
       <button class="btn btn-primary btn-big" id="btn-start">Inizia partita</button>
 
@@ -32,29 +45,19 @@
         <p class="meta-line" id="fresh-count"></p>
         <p class="meta-line" id="best-line"></p>
         <button class="btn-link" id="btn-reset" type="button">Azzera gli eventi già visti</button>
+        <button class="btn-link" id="btn-theme" type="button">Leggi su carta</button>
       </div>
-
-      <ul class="rules">
-        <li><strong>Anno esatto</strong> vale 100 punti pieni.</li>
-        <li>Il margine di errore si allarga per gli eventi più antichi.</li>
-        <li>L'<strong>indizio</strong> svela il secolo, ma taglia il round a 75 punti.</li>
-        <li>Gli eventi arrivano da <strong>Wikipedia</strong>: sono sempre diversi.</li>
-      </ul>
     </div>
   </section>
 
   <!-- ══════════════════════════════════════════════════════════ Round in corso -->
   <section class="screen screen-round" id="screen-round" hidden>
     <header class="hud">
-      <span class="hud-item">Round <strong id="round-index">1</strong><span class="hud-sep">/</span><span id="round-total-count">5</span></span>
-      <span class="hud-badge" id="round-mode">Medio</span>
-      <span class="hud-item hud-right"><strong id="round-score">0</strong> punti</span>
+      <span>Round <strong id="round-index">I</strong> · <span id="round-total-count">V</span></span>
+      <span><strong id="round-score">0</strong> punti</span>
     </header>
 
-    <div class="dots" id="round-dots" aria-hidden="true"></div>
-
-    <article class="event-card">
-      <span class="chip" id="event-cat">Storia</span>
+    <article class="event">
       <h2 class="event-text" id="event-text"></h2>
       <p class="hint-line" id="hint-line" hidden></p>
     </article>
@@ -89,22 +92,18 @@
         </div>
       </div>
 
-      <div class="jumps" id="year-jumps" role="group" aria-label="Salta a un'epoca"></div>
-
       <div class="actions">
         <button class="btn btn-ghost" type="button" id="btn-hint">Indizio</button>
         <button class="btn btn-primary" type="button" id="btn-confirm">Conferma l'anno</button>
       </div>
-      <p class="keyhint">Frecce ← → per un anno, con Maiusc per dieci, Invio per confermare.</p>
     </section>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════ Rivelazione -->
   <section class="screen screen-reveal" id="screen-reveal" hidden>
     <header class="hud">
-      <span class="hud-item">Round <strong id="reveal-index">1</strong><span class="hud-sep">/</span>5</span>
-      <span class="hud-badge" id="reveal-verdict">Molto vicino</span>
-      <span class="hud-item hud-right"><strong id="reveal-total">0</strong> punti</span>
+      <span>Round <strong id="reveal-index">I</strong> · <span id="reveal-total-count">V</span></span>
+      <span><strong id="reveal-total">0</strong> punti</span>
     </header>
 
     <div class="reveal-block">
@@ -125,22 +124,7 @@
       </div>
     </div>
 
-    <div class="stats">
-      <div class="stat">
-        <span class="stat-label">La tua risposta</span>
-        <span class="stat-value" id="stat-guess">—</span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Scarto</span>
-        <span class="stat-value" id="stat-gap">—</span>
-      </div>
-      <div class="stat stat-points">
-        <span class="stat-label">Punti del round</span>
-        <span class="stat-value" id="stat-points">0</span>
-      </div>
-    </div>
-
-    <div class="score-bar"><span class="score-fill" id="score-fill"></span></div>
+    <p class="reveal-stats" id="reveal-stats"></p>
     <p class="hint-used" id="hint-used" hidden>Indizio usato: massimo 75 punti su questo round.</p>
 
     <p class="note" id="reveal-note"></p>

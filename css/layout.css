@@ -4,21 +4,23 @@
   min-height: 100%;
   display: flex;
   justify-content: center;
-  padding: clamp(16px, 4vw, 44px) clamp(14px, 4vw, 28px) 56px;
+  padding: clamp(20px, 5vw, 56px) clamp(16px, 5vw, 32px) 64px;
 }
 
 .screen {
   width: 100%;
-  max-width: 720px;
+  max-width: 660px;
   display: flex;
   flex-direction: column;
-  gap: clamp(16px, 2.4vw, 24px);
-  animation: screen-in 0.32s ease both;
+  gap: clamp(22px, 3.2vw, 34px);
+  animation: screen-in 0.28s ease both;
 }
 
+/* Solo dissolvenza: uno scorrimento a ogni cambio schermata si nota, ed è
+   esattamente ciò che qui non deve succedere. */
 @keyframes screen-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ───────────────────────────────────────────────────────────────── Home */
@@ -29,82 +31,58 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(18px, 3vw, 26px);
+  gap: clamp(22px, 3.4vw, 30px);
   text-align: center;
-  padding-top: clamp(8px, 5vh, 48px);
+  padding-top: clamp(8px, 6vh, 56px);
 }
 
 .logo {
   font-family: var(--serif);
-  font-size: clamp(2.4rem, 9vw, 3.6rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.6rem, 9.5vw, 3.9rem);
+  font-weight: 400;
+  letter-spacing: -0.015em;
 }
-.logo span { color: var(--gold); }
+.logo span { color: var(--seal); }
 
 .tagline {
-  color: var(--text-dim);
-  max-width: 44ch;
-  font-size: clamp(0.95rem, 2.4vw, 1.05rem);
-}
-.tagline strong { color: var(--text); }
-
-.modes {
-  display: grid;
-  gap: 10px;
-  width: 100%;
-  max-width: 460px;
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--fg-dim);
+  max-width: 42ch;
+  font-size: clamp(1.05rem, 2.6vw, 1.15rem);
+  text-wrap: balance;
 }
 
 .home-meta {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
-
-.rules {
-  display: grid;
-  gap: 8px;
-  text-align: left;
-  max-width: 460px;
-  width: 100%;
-  padding-top: 6px;
-  border-top: 1px solid var(--line);
-  color: var(--text-dim);
-  font-size: 0.88rem;
-}
-.rules li { padding-left: 18px; position: relative; }
-.rules li::before {
-  content: "";
-  position: absolute;
-  left: 2px; top: 0.62em;
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--gold);
-}
-.rules strong { color: var(--text); font-weight: 600; }
 
 /* ──────────────────────────────────────────────────────────────── Round */
 
 .hud {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  font-size: 0.85rem;
-  color: var(--text-dim);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+  box-shadow: 0 3px 0 -2px var(--rule);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-faint);
 }
-.hud-item strong { color: var(--text); font-size: 1rem; }
-.hud-sep { opacity: 0.5; margin: 0 1px; }
-.hud-right { text-align: right; }
+.hud strong { color: var(--fg-dim); font-weight: 500; }
 
 .controls {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 14px;
+  gap: 16px;
 }
 
 .actions {
@@ -114,41 +92,36 @@
 .actions .btn-primary { flex: 1; }
 .actions-center { justify-content: center; flex-wrap: wrap; }
 
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
 /* ──────────────────────────────────────────────────────────── Risultati */
 
 .screen-results { text-align: center; align-items: center; }
 
 .results-label {
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.72rem;
-  color: var(--text-faint);
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  color: var(--fg-faint);
 }
 
 .final-score {
   font-size: clamp(3.4rem, 15vw, 5.2rem);
   line-height: 1;
-  color: var(--gold);
+  color: var(--seal);
 }
 .final-max {
   font-size: 0.32em;
-  color: var(--text-faint);
+  color: var(--fg-faint);
   margin-left: 4px;
 }
 
-.final-title { font-size: 1.3rem; }
-.final-text { color: var(--text-dim); max-width: 40ch; }
+.final-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; }
+.final-text { color: var(--fg-dim); max-width: 40ch; text-wrap: balance; }
 
-.recap { width: 100%; display: grid; gap: 8px; text-align: left; }
+.recap { width: 100%; text-align: left; }
 
 @media (max-width: 460px) {
-  .stats { grid-template-columns: 1fr 1fr; }
-  .stat-points { grid-column: 1 / -1; }
   .controls { flex-direction: column; align-items: stretch; }
+  /* Con due bottoni affiancati su schermo stretto "Conferma l'anno" andrebbe
+     a capo: si stringe l'imbottitura invece di accorciare le etichette. */
+  .actions .btn { padding: 12px 10px; font-size: 0.9rem; }
 }

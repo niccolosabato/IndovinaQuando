@@ -10,7 +10,6 @@
    *   filter    quali eventi possono uscire
    *   segments  come lo slider distribuisce la sua corsa sugli anni
    *   tolerance moltiplicatore applicato alla tolleranza di base del punteggio
-   *   jumps     anni proposti dai pulsanti di salto rapido
    */
   var MODES = {
     facile: {
@@ -19,8 +18,7 @@
       blurb: 'Solo dal 1900 a oggi, con un margine di errore generoso.',
       filter: function (ev) { return ev.year >= 1900; },
       segments: [{ from: 1900, to: CURRENT_YEAR, w: 1 }],
-      tolerance: 2,
-      jumps: [1920, 1945, 1970, 1990, 2010]
+      tolerance: 2
     },
     medio: {
       id: 'medio',
@@ -28,8 +26,7 @@
       blurb: 'Dal 1500 a oggi: cinque secoli da coprire.',
       filter: function (ev) { return ev.year >= 1500; },
       segments: [{ from: 1500, to: CURRENT_YEAR, w: 1 }],
-      tolerance: 1.4,
-      jumps: [1600, 1700, 1800, 1900, 2000]
+      tolerance: 1.4
     },
     difficile: {
       id: 'difficile',
@@ -45,8 +42,7 @@
         { from: 1500, to: 1900, w: 1.5 },
         { from: 1900, to: CURRENT_YEAR, w: 1.5 }
       ],
-      tolerance: 1,
-      jumps: [-500, 500, 1300, 1700, 1900, 2000]
+      tolerance: 1
     }
   };
 

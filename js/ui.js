@@ -14,17 +14,25 @@
   var el = {};
   var SCREENS = ['home', 'round', 'reveal', 'results'];
 
+  /* I round si contano in numeri romani, come i capitoli di una cronaca; i punti
+   * restano in cifre arabe, perché quelli si leggono e non si contemplano. */
+  var ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+
+  function roman(n) {
+    return ROMAN[n] || String(n);
+  }
+
   function cache() {
     [
       'screen-home', 'screen-round', 'screen-reveal', 'screen-results',
-      'mode-list', 'btn-start', 'btn-reset', 'fresh-count', 'best-line',
-      'round-index', 'round-total-count', 'round-mode', 'round-score', 'round-dots',
-      'event-cat', 'event-text', 'hint-line',
+      'mode-list', 'mode-blurb', 'btn-start', 'btn-reset', 'btn-theme', 'fresh-count', 'best-line',
+      'round-index', 'round-total-count', 'round-score',
+      'event-text', 'hint-line',
       'guess-year', 'year-slider', 'slider-ticks', 'year-input', 'year-era',
-      'year-jumps', 'btn-hint', 'btn-confirm',
-      'reveal-index', 'reveal-verdict', 'reveal-total', 'reveal-year', 'reveal-event',
+      'btn-hint', 'btn-confirm',
+      'reveal-index', 'reveal-total-count', 'reveal-total', 'reveal-year', 'reveal-event',
       'tl-band', 'tl-guess', 'tl-actual', 'tl-guess-tag', 'tl-actual-tag', 'tl-min', 'tl-max',
-      'stat-guess', 'stat-gap', 'stat-points', 'score-fill', 'hint-used', 'reveal-note',
+      'reveal-stats', 'hint-used', 'reveal-note',
       'btn-next',
       'final-points', 'final-title', 'final-text', 'final-record', 'recap',
       'btn-again', 'btn-home'
@@ -42,31 +50,29 @@
 
   /* ───────────────────────────────────────────────────────────────── Home */
 
+  /* Tre voci in fila; la descrizione è una riga sola, che segue la selezione. */
   function renderModes(selectedId, onSelect) {
     var list = el['mode-list'];
     list.innerHTML = '';
     IQ.Config.MODE_ORDER.forEach(function (id) {
-      var mode = IQ.Config.MODES[id];
-      var card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'mode-card';
-      card.setAttribute('role', 'radio');
-      card.setAttribute('aria-checked', String(id === selectedId));
-      card.innerHTML =
-        '<span class="mode-dot"></span>' +
-        '<span><span class="mode-name"></span><br><span class="mode-blurb"></span></span>';
-      card.querySelector('.mode-name').textContent = mode.label;
-      card.querySelector('.mode-blurb').textContent = mode.blurb;
-      card.addEventListener('click', function () { onSelect(id); });
-      list.appendChild(card);
+      var item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'mode-item';
+      item.setAttribute('role', 'radio');
+      item.setAttribute('aria-checked', String(id === selectedId));
+      item.textContent = IQ.Config.MODES[id].label;
+      item.addEventListener('click', function () { onSelect(id); });
+      list.appendChild(item);
     });
+    selectMode(selectedId);
   }
 
   function selectMode(selectedId) {
-    var cards = el['mode-list'].querySelectorAll('.mode-card');
+    var items = el['mode-list'].querySelectorAll('.mode-item');
     IQ.Config.MODE_ORDER.forEach(function (id, i) {
-      if (cards[i]) cards[i].setAttribute('aria-checked', String(id === selectedId));
+      if (items[i]) items[i].setAttribute('aria-checked', String(id === selectedId));
     });
+    el['mode-blurb'].textContent = IQ.Config.mode(selectedId).blurb;
   }
 
   function renderHomeMeta(mode) {
@@ -89,6 +95,19 @@
       : 'Nessun record ancora registrato in ' + mode.label + '.';
   }
 
+  /* La notte è il tema predefinito, quindi l'attributo si mette solo per la
+   * carta: senza attributo valgono le variabili di :root. */
+  function applyTheme(name) {
+    var paper = name === 'carta';
+    if (paper) document.documentElement.dataset.theme = 'carta';
+    else delete document.documentElement.dataset.theme;
+
+    el['btn-theme'].textContent = paper ? 'Leggi a lume di candela' : 'Leggi su carta';
+
+    var meta = document.getElementById('theme-color');
+    if (meta) meta.setAttribute('content', paper ? '#f5efe2' : '#16130f');
+  }
+
   /* Attesa del primo scaricamento: il pulsante si spegne invece di sembrare rotto. */
   function setLoading(on) {
     el['btn-start'].disabled = on;
@@ -96,16 +115,6 @@
   }
 
   /* ──────────────────────────────────────────────────────────────── Round */
-
-  function renderDots(current, total) {
-    var box = el['round-dots'];
-    box.innerHTML = '';
-    for (var i = 0; i < total; i++) {
-      var d = document.createElement('span');
-      d.className = 'dot' + (i < current ? ' is-done' : (i === current ? ' is-current' : ''));
-      box.appendChild(d);
-    }
-  }
 
   function renderTicks(scale) {
     var box = el['slider-ticks'];
@@ -126,39 +135,22 @@
     });
   }
 
-  function renderJumps(mode, onJump) {
-    var box = el['year-jumps'];
-    box.innerHTML = '';
-    mode.jumps.forEach(function (year) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'btn-jump';
-      b.textContent = Scale.formatYear(year);
-      b.addEventListener('click', function () { onJump(year); });
-      box.appendChild(b);
-    });
-  }
-
   /* Prepara la schermata per un nuovo round. */
   function renderRound(ctx) {
-    el['round-index'].textContent = ctx.index + 1;
-    el['round-total-count'].textContent = IQ.Config.ROUNDS;
-    el['round-mode'].textContent = ctx.mode.label;
+    el['round-index'].textContent = roman(ctx.index + 1);
+    el['round-total-count'].textContent = roman(IQ.Config.ROUNDS);
     el['round-score'].textContent = ctx.score;
-    el['event-cat'].textContent = ctx.event.cat;
     el['event-text'].textContent = ctx.event.text;
     el['hint-line'].hidden = true;
     el['hint-line'].textContent = '';
     el['btn-hint'].disabled = false;
     el['btn-hint'].textContent = 'Indizio (max 75 punti)';
-    renderDots(ctx.index, IQ.Config.ROUNDS);
   }
 
   /* Configura i controlli sul range della modalità (una volta per partita). */
-  function setupControls(scale, mode, onJump) {
+  function setupControls(scale) {
     var bc = scale.min < 0;
     renderTicks(scale);
-    renderJumps(mode, onJump);
     el['year-era'].hidden = !bc;
     el['year-input'].min = bc ? 0 : scale.min;
     el['year-input'].max = bc ? Math.max(Math.abs(scale.min), scale.max) : scale.max;
@@ -186,16 +178,25 @@
 
   /* ─────────────────────────────────────────────────────────── Rivelazione */
 
+  function gapLabel(diff) {
+    if (diff === 0) return 'in pieno';
+    return diff === 1 ? '1 anno di scarto' : diff + ' anni di scarto';
+  }
+
   function renderReveal(r) {
-    el['reveal-index'].textContent = r.index + 1;
-    el['reveal-verdict'].textContent = r.verdict;
+    el['reveal-index'].textContent = roman(r.index + 1);
+    el['reveal-total-count'].textContent = roman(IQ.Config.ROUNDS);
     el['reveal-total'].textContent = r.total;
     el['reveal-year'].textContent = Scale.formatYear(r.event.year);
     el['reveal-event'].textContent = r.event.text;
     el['reveal-note'].textContent = r.event.note;
 
-    el['stat-guess'].textContent = Scale.formatYear(r.guess);
-    el['stat-gap'].textContent = r.diff === 0 ? '0' : (r.diff === 1 ? '1 anno' : r.diff + ' anni');
+    /* Verdetto, risposta, scarto e punti stanno in una riga sola: erano tre
+     * riquadri più un badge per dire quattro cose corte. */
+    el['reveal-stats'].innerHTML = r.verdict + ' · hai detto <strong>' +
+      Scale.formatYear(r.guess) + '</strong> · ' + gapLabel(r.diff) +
+      ' · <span class="points' + (r.points === 0 ? ' is-zero' : '') + '">' +
+      r.points + '</span> punti';
     el['hint-used'].hidden = !r.usedHint;
 
     /* Marcatori sulla striscia temporale. */
@@ -209,28 +210,6 @@
     el['tl-actual-tag'].textContent = Scale.formatYear(r.event.year);
     el['tl-min'].textContent = Scale.formatYear(r.scale.min);
     el['tl-max'].textContent = Scale.formatYear(r.scale.max);
-
-    /* Barra e conteggio dei punti partono da zero e salgono. */
-    el['score-fill'].style.width = '0%';
-    countUp(el['stat-points'], r.points, 700);
-    global.setTimeout(function () {
-      el['score-fill'].style.width = (r.points / IQ.Config.MAX_ROUND_SCORE * 100) + '%';
-    }, 60);
-  }
-
-  function countUp(node, target, duration) {
-    if (target === 0 || global.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      node.textContent = target;
-      return;
-    }
-    var start = null;
-    function step(ts) {
-      if (start === null) start = ts;
-      var k = Math.min(1, (ts - start) / duration);
-      node.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
-      if (k < 1) global.requestAnimationFrame(step);
-    }
-    global.requestAnimationFrame(step);
   }
 
   /* ───────────────────────────────────────────────────────────  Risultati */
@@ -275,6 +254,7 @@
     renderModes: renderModes,
     selectMode: selectMode,
     renderHomeMeta: renderHomeMeta,
+    applyTheme: applyTheme,
     setLoading: setLoading,
     renderRound: renderRound,
     setupControls: setupControls,

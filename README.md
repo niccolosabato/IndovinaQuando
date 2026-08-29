@@ -26,13 +26,15 @@ Apri https://niccolosabato.github.io/IndovinaQuando/
 
 ### Come si inserisce l'anno
 
-Cinque modi, tutti sincronizzati fra loro:
+Quattro modi, tutti sincronizzati fra loro:
 
 1. lo **slider**, con le tacche delle epoche sotto;
 2. il campo **anno esatto**, con selettore a.C./d.C. nel livello Difficile;
 3. i pulsanti **−100 / −10 / −1 / +1 / +10 / +100**;
-4. i **salti rapidi** a un'epoca;
-5. la **tastiera**: `←` `→` per un anno, con `Maiusc` per dieci, `Invio` per confermare.
+4. la **tastiera**: `←` `→` per un anno, con `Maiusc` per dieci, `Invio` per confermare.
+
+L'interfaccia non lo dice: le scorciatoie si scoprono provandole, e la riga che le
+elencava era l'ennesima istruzione da leggere prima di giocare.
 
 ## Struttura
 
@@ -42,9 +44,9 @@ IndovinaQuando/
 ├── assets/
 │   └── favicon.svg
 ├── css/
-│   ├── base.css        variabili, tipografia, sfondo
+│   ├── base.css        variabili e tipografia
 │   ├── layout.css      impalcatura delle schermate
-│   └── components.css  bottoni, slider, card, timeline, riepilogo
+│   └── components.css  bottoni, slider, timeline, riepilogo
 ├── data/
 │   └── events.js       mazzo curato di riserva, scritto a mano
 └── js/
@@ -61,6 +63,27 @@ IndovinaQuando/
 Gli script sono classici (niente ES modules) e condividono il namespace globale
 `window.IQ`: è la ragione per cui il gioco funziona anche aperto da `file://`,
 dove i moduli verrebbero bloccati dalle regole CORS del browser.
+
+## Aspetto
+
+Il gioco è impaginato come la pagina di una cronaca, letta in due luci: **notte**
+(il tema predefinito, a lume di candela) e **carta**. Si cambia dall'interruttore
+in home e la scelta resta in `localStorage`; il predefinito è la notte a
+prescindere dal tema di sistema.
+
+Cambia l'illuminazione, non l'impaginato: in entrambi i temi i due accenti hanno
+gli stessi ruoli — `--quill` è **quello che scrivi tu** (l'anno mentre lo cerchi),
+`--seal` è **quello che dice la storia** (l'anno vero, il punteggio finale). Niente
+riquadri né ombre: dove serve separare c'è un filetto, doppio nei due punti che
+fanno da testata.
+
+Il tema salvato viene applicato da un piccolo script *nel `<head>`* di
+`index.html` — l'unico del progetto a stare lassù. Spostandolo in fondo con gli
+altri, chi ha scelto la carta vedrebbe un lampo di notte a ogni caricamento.
+
+I caratteri sono **EB Garamond** e **Alegreya Sans**, caricati da Google Fonts.
+Se non arrivano — offline, o aprendo la pagina da `file://` — si scende su
+Georgia e sul sans di sistema: cambia l'eleganza, non la leggibilità.
 
 ## Da dove arrivano gli eventi
 
