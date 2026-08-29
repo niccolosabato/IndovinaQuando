@@ -5,12 +5,7 @@ Gioco web: leggi un evento storico e indovina in che anno è successo.
 
 ## Come si gioca
 
-Apri `index.html` in un browser. Nessuna installazione, nessun server, nessuna
-dipendenza: è HTML, CSS e JavaScript e basta.
-
-```
-xdg-open index.html
-```
+Apri https://niccolosabato.github.io/IndovinaQuando/
 
 ## Regole
 
