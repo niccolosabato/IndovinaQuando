@@ -9,10 +9,18 @@
 
   var IQ = global.IQ || (global.IQ = {});
 
+  /* Il mazzo è la somma degli eventi curati e di quelli arrivati da Wikipedia:
+   * i primi ci sono sempre, i secondi cambiano a ogni partita. */
+  function all() {
+    var remote = IQ.Remote ? IQ.Remote.events() : [];
+    return remote.length ? IQ.EVENTS.concat(remote) : IQ.EVENTS;
+  }
+
   function pool(mode) {
+    var source = all();
     var out = [];
-    for (var i = 0; i < IQ.EVENTS.length; i++) {
-      if (mode.filter(IQ.EVENTS[i])) out.push(IQ.EVENTS[i]);
+    for (var i = 0; i < source.length; i++) {
+      if (mode.filter(source[i])) out.push(source[i]);
     }
     return out;
   }

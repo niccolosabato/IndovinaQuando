@@ -33,8 +33,22 @@
     UI.show('home');
   }
 
+  /* L'unico punto asincrono del flusso: prima di dare le carte si aspetta che ci
+   * siano abbastanza eventi mai visti. `ensure` richiama comunque, anche se la
+   * rete è andata male — in quel caso si gioca con il mazzo locale. */
   function startGame() {
     state.mode = Cfg.mode(state.modeId);
+
+    if (!IQ.Remote) { deal(); return; }
+
+    UI.setLoading(true);
+    IQ.Remote.ensure(state.mode, Cfg.ROUNDS, function () {
+      UI.setLoading(false);
+      deal();
+    });
+  }
+
+  function deal() {
     state.scale = Scale.create(state.mode.segments);
     state.deck = IQ.Deck.draw(state.mode, Cfg.ROUNDS);
     state.index = 0;
@@ -214,6 +228,14 @@
     state.scale = Scale.create(state.mode.segments);
     bind();
     goHome();
+
+    /* Scaricamento in sottofondo: quando il giocatore clicca, gli eventi nuovi
+     * sono già lì e la partita parte senza attese. */
+    if (IQ.Remote) {
+      IQ.Remote.prefetch(function () {
+        if (state.phase === 'home') UI.renderHomeMeta(state.mode);
+      });
+    }
   }
 
   if (document.readyState === 'loading') {

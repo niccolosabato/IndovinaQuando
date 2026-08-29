@@ -9,7 +9,8 @@ Apri https://niccolosabato.github.io/IndovinaQuando/
 
 ## Regole
 
-- Ogni partita propone **5 eventi**, sempre diversi da quelli già usciti.
+- Ogni partita propone **5 eventi**, presi da Wikipedia e sempre diversi da
+  quelli già usciti.
 - L'anno esatto vale **100 punti**; poi il punteggio scende man mano che ci si allontana.
 - Il margine di errore concesso dipende dall'epoca (per un evento del 1969 sono
   pochi anni, per uno del 1750 a.C. molti di più) e dal livello scelto.
@@ -45,12 +46,13 @@ IndovinaQuando/
 │   ├── layout.css      impalcatura delle schermate
 │   └── components.css  bottoni, slider, card, timeline, riepilogo
 ├── data/
-│   └── events.js       database degli eventi storici
+│   └── events.js       mazzo curato di riserva, scritto a mano
 └── js/
     ├── config.js       livelli di difficoltà e costanti
     ├── scale.js        mappatura slider ↔ anno, formattazione degli anni
     ├── scoring.js      calcolo del punteggio
     ├── storage.js      eventi già visti e record (localStorage)
+    ├── remote.js       eventi scaricati da Wikipedia
     ├── deck.js         estrazione dei 5 eventi della partita
     ├── ui.js           rendering del DOM
     └── main.js         stato della partita
@@ -59,6 +61,30 @@ IndovinaQuando/
 Gli script sono classici (niente ES modules) e condividono il namespace globale
 `window.IQ`: è la ragione per cui il gioco funziona anche aperto da `file://`,
 dove i moduli verrebbero bloccati dalle regole CORS del browser.
+
+## Da dove arrivano gli eventi
+
+Il grosso lo scarica `js/remote.js` dall'API *onthisday* di Wikimedia in italiano:
+
+```
+https://api.wikimedia.org/feed/v1/wikipedia/it/onthisday/events/MM/DD
+```
+
+È pubblica — nessuna chiave, CORS aperto — quindi basta il sito statico, senza
+alcun backend. A ogni apertura si pescano quattro giorni di calendario a caso
+(un'ottantina di eventi grezzi), così il mazzo non finisce mai e le partite non
+si somigliano. Quello che arriva viene ripulito prima di entrare in gioco:
+
+- si scartano i testi troppo corti o troppo lunghi;
+- si scarta **qualsiasi testo che contenga un anno**, che regalerebbe la risposta;
+- la curiosità è il riassunto della voce Wikipedia collegata, preferendo la pagina
+  dedicata all'evento invece di quella generica;
+- la categoria è dedotta dalle parole del testo.
+
+Gli eventi scaricati restano in cache su `localStorage` (fino a 600). I 197 eventi
+scritti a mano in `data/events.js` restano nel mazzo insieme a quelli remoti e
+reggono il gioco da soli quando la rete manca o quando la pagina è aperta da
+`file://`, dove il browser vieta le richieste verso un'altra origine.
 
 ## Aggiungere un evento
 

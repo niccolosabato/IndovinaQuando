@@ -11,6 +11,7 @@
 
   var SEEN_KEY = 'iq.seen';
   var BEST_KEY = 'iq.best';
+  var SEEN_MAX = 3000;
 
   function read(key, fallback) {
     try {
@@ -42,8 +43,18 @@
 
     markSeen: function (ids) {
       var set = this.seen();
-      for (var i = 0; i < ids.length; i++) set[ids[i]] = true;
-      write(SEEN_KEY, Object.keys(set));
+      for (var i = 0; i < ids.length; i++) {
+        /* Togliere e rimettere sposta l'id in fondo: le chiavi stringa conservano
+         * l'ordine di inserimento, quindi in coda restano i visti di recente. */
+        delete set[ids[i]];
+        set[ids[i]] = true;
+      }
+      /* Con gli eventi da Wikipedia la lista crescerebbe all'infinito: si tengono
+       * gli ultimi SEEN_MAX e si lasciano cadere i più vecchi, che a quel punto
+       * possono tranquillamente ricapitare. */
+      var keys = Object.keys(set);
+      if (keys.length > SEEN_MAX) keys = keys.slice(keys.length - SEEN_MAX);
+      write(SEEN_KEY, keys);
     },
 
     /* Dimentica solo gli id passati (quelli di una modalità), non tutti. */

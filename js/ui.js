@@ -73,14 +73,26 @@
     var fresh = IQ.Deck.freshCount(mode);
     var total = IQ.Deck.poolSize(mode);
     var best = IQ.Storage.best(mode.id);
+    var remote = (IQ.Remote && IQ.Remote.events().length) || 0;
 
-    el['fresh-count'].innerHTML = fresh > 0
-      ? 'Eventi mai visti in questo livello: <strong>' + fresh + '</strong> su ' + total + '.'
-      : 'Hai già visto tutti i ' + total + ' eventi di questo livello: si ricomincia mescolando.';
+    /* Con gli eventi da Wikipedia il totale cresce a ogni partita: un "N su TOTAL"
+     * darebbe un denominatore che cambia sotto gli occhi. Il messaggio del mazzo
+     * chiuso resta per quando si gioca con i soli eventi locali (offline). */
+    el['fresh-count'].innerHTML = remote > 0
+      ? 'Eventi sempre nuovi da Wikipedia: <strong>' + fresh + '</strong> pronti in questo livello.'
+      : (fresh > 0
+        ? 'Eventi mai visti in questo livello: <strong>' + fresh + '</strong> su ' + total + '.'
+        : 'Hai già visto tutti i ' + total + ' eventi di questo livello: si ricomincia mescolando.');
 
     el['best-line'].innerHTML = best > 0
       ? 'Il tuo record in ' + mode.label + ': <strong>' + best + '</strong>/' + IQ.Config.MAX_GAME_SCORE + '.'
       : 'Nessun record ancora registrato in ' + mode.label + '.';
+  }
+
+  /* Attesa del primo scaricamento: il pulsante si spegne invece di sembrare rotto. */
+  function setLoading(on) {
+    el['btn-start'].disabled = on;
+    el['btn-start'].textContent = on ? 'Carico eventi…' : 'Inizia partita';
   }
 
   /* ──────────────────────────────────────────────────────────────── Round */
@@ -263,6 +275,7 @@
     renderModes: renderModes,
     selectMode: selectMode,
     renderHomeMeta: renderHomeMeta,
+    setLoading: setLoading,
     renderRound: renderRound,
     setupControls: setupControls,
     syncGuess: syncGuess,
