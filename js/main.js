@@ -21,7 +21,8 @@
     rounds: [],
     total: 0,
     theme: 'notte',    // notte | carta
-    phase: 'home'      // home | round | reveal | results
+    phase: 'home',     // home | round | reveal | results
+    loading: false     // scaricamento in corso: non si avvia una seconda partita
   };
 
   /* ─────────────────────────────────────────────────────────────── Partita */
@@ -38,12 +39,18 @@
    * siano abbastanza eventi mai visti. `ensure` richiama comunque, anche se la
    * rete è andata male — in quel caso si gioca con il mazzo locale. */
   function startGame() {
+    /* Il bottone si spegne durante l'attesa, ma l'Invio no: senza questa guardia
+     * ogni pressione lancia un `ensure`, e alla fine del caricamento la partita
+     * viene distribuita una volta per pressione. */
+    if (state.loading) return;
     state.mode = Cfg.mode(state.modeId);
 
     if (!IQ.Remote) { deal(); return; }
 
+    state.loading = true;
     UI.setLoading(true);
     IQ.Remote.ensure(state.mode, Cfg.ROUNDS, function () {
+      state.loading = false;
       UI.setLoading(false);
       deal();
     });
@@ -52,6 +59,11 @@
   function deal() {
     state.scale = Scale.create(state.mode.segments);
     state.deck = IQ.Deck.draw(state.mode, Cfg.ROUNDS);
+
+    /* Con i 197 eventi curati il mazzo non è mai vuoto, ma se lo fosse un round
+     * senza evento manderebbe in errore la pagina intera invece di un livello. */
+    if (!state.deck.length) { goHome(); UI.noEvents(); return; }
+
     state.index = 0;
     state.rounds = [];
     state.total = 0;
@@ -147,28 +159,42 @@
 
   /* ────────────────────────────────────────────────────────────  Controlli */
 
-  function readExactInput(commit) {
+  /* Legge l'anno digitato nel campo grande. Con `commit` si passa da setGuess, che
+   * arrotonda dentro la scala e riallinea tutto; senza, si è ancora a metà
+   * digitazione e si tocca il meno possibile. */
+  function readYearField(commit) {
     var el = UI.el;
-    var raw = parseInt(el['year-input'].value, 10);
-    if (isNaN(raw)) return;
+    var field = el['guess-year'];
 
-    /* Con il selettore a.C./d.C. visibile il campo contiene un numero positivo
-     * e il segno lo decide la tendina; altrimenti il campo è già l'anno. */
-    var year = el['year-era'].hidden
-      ? raw
-      : Math.abs(raw) * (parseInt(el['year-era'].value, 10) < 0 ? -1 : 1);
+    /* Il campo è type="text" per non trascinarsi dietro lo spinner del numerico:
+     * le cifre si filtrano qui. Si riscrive solo se c'era davvero da togliere,
+     * altrimenti il cursore salterebbe a fondo riga a ogni tasto. */
+    var digits = field.value.replace(/[^\d]/g, '');
+    if (digits !== field.value) field.value = digits;
+    UI.fitYearField(digits);
+
+    /* Campo vuoto: è un passaggio legittimo mentre si cancella per riscrivere. */
+    if (!digits) return;
+
+    /* L'era non è uno stato a parte, è il segno dell'anno corrente. */
+    var year = parseInt(digits, 10) * (state.guess < 0 ? -1 : 1);
 
     if (commit) {
       setGuess(year);
       return;
     }
 
-    /* Mentre si digita non si riscrive il campo — il cursore salterebbe a ogni
-     * tasto — e si ignorano i valori ancora fuori scala ("1" che diventerà 1969). */
+    /* Si ignorano i valori ancora fuori scala ("1" che diventerà 1969). */
     if (year < state.scale.min || year > state.scale.max) return;
     state.guess = year;
-    el['guess-year'].textContent = Scale.formatYear(year);
     el['year-slider'].value = String(Math.round(state.scale.toPos(year) * 1000));
+    el['year-slider'].setAttribute('aria-valuetext', Scale.formatYear(year));
+  }
+
+  /* Lo zero non ha segno: da lì si scende a 1 a.C., il suo vicino a sinistra. */
+  function toggleEra() {
+    if (state.phase !== 'round') return;
+    setGuess(state.guess === 0 ? -1 : -state.guess);
   }
 
   function bind() {
@@ -197,9 +223,11 @@
       setGuess(state.scale.toYear(Number(this.value) / 1000));
     });
 
-    el['year-input'].addEventListener('input', function () { readExactInput(false); });
-    el['year-input'].addEventListener('change', function () { readExactInput(true); });
-    el['year-era'].addEventListener('change', function () { readExactInput(true); });
+    el['guess-year'].addEventListener('input', function () { readYearField(false); });
+    /* blur e non change: copre anche l'anno fuori scala lasciato lì e abbandonato,
+     * che deve tornare a un valore valido invece di restare scritto male. */
+    el['guess-year'].addEventListener('blur', function () { readYearField(true); });
+    el['guess-era'].addEventListener('click', toggleEra);
 
     Array.prototype.forEach.call(document.querySelectorAll('.btn-nudge'), function (b) {
       b.addEventListener('click', function () { nudge(Number(b.dataset.delta)); });
@@ -215,8 +243,9 @@
   }
 
   function onKey(e) {
+    var tag = e.target && e.target.tagName;
     /* Le frecce dentro il campo numerico restano quelle del campo. */
-    var typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT');
+    var typing = tag === 'INPUT' || tag === 'SELECT';
 
     if (state.phase === 'round' && !typing) {
       if (e.key === 'ArrowLeft')  { nudge(e.shiftKey ? -10 : -1); e.preventDefault(); return; }
@@ -224,7 +253,18 @@
     }
     if (e.key !== 'Enter') return;
 
-    if (state.phase === 'round') { confirmGuess(); e.preventDefault(); }
+    /* Invio con il fuoco su un bottone appartiene al bottone: il browser ne genera
+     * già il click, e agire anche qui farebbe due cose con un tasto solo — chiedere
+     * l'indizio e insieme confermare il round. */
+    if (tag === 'BUTTON' || tag === 'A') return;
+
+    if (state.phase === 'round') {
+      /* Invio dal campo conferma il round: il valore va committato prima, o si
+       * confermerebbe l'anno com'era all'ultimo passaggio dentro la scala. */
+      if (e.target === UI.el['guess-year']) readYearField(true);
+      confirmGuess();
+      e.preventDefault();
+    }
     else if (state.phase === 'reveal') { nextRound(); e.preventDefault(); }
     else if (state.phase === 'home') { startGame(); e.preventDefault(); }
   }

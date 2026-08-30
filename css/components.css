@@ -110,15 +110,49 @@
   gap: 20px;
 }
 
+/* L'anno è il campo: si legge e si scrive nello stesso punto. Il filetto
+   tratteggiato è tutto l'invito — un riquadro qui sarebbe la cornice che il resto
+   della pagina non ha. */
 .guess {
-  display: block;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.12em;
   font-size: clamp(2.6rem, 11vw, 3.4rem);
   line-height: 1;
   color: var(--quill);
-  -webkit-user-select: none;
-  user-select: none;
 }
+
+.guess-year {
+  width: 4ch;              /* ricalcolata da ui.js sul contenuto */
+  padding: 0;
+  border: 0;
+  border-bottom: 1px dashed var(--rule);
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  /* font: inherit riporta le sotto-proprietà dello shorthand ai valori iniziali e
+     perderebbe il tabular-nums di base.css, che è ciò su cui si regge il ch. */
+  font-variant-numeric: lining-nums tabular-nums;
+  text-align: center;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.guess-year:focus { border-bottom-color: var(--quill); border-bottom-style: solid; }
+
+.guess-era {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg-dim);
+  font: inherit;
+  font-size: 0.42em;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: color 0.15s ease;
+}
+.guess-era:hover { color: var(--quill); }
 
 /* Slider ------------------------------------------------------------- */
 
@@ -190,10 +224,11 @@
   .ticks { font-size: 0.6rem; }
 }
 
-/* Correzioni rapide e anno esatto ------------------------------------- */
+/* Correzioni rapide ---------------------------------------------------- */
 
 .nudges {
   display: flex;
+  justify-content: center;
   gap: 6px;
   flex-wrap: wrap;
   -webkit-user-select: none;
@@ -214,25 +249,6 @@
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .btn-nudge:hover { border-color: var(--fg-faint); color: var(--fg); }
-
-.exact { display: grid; grid-template-columns: auto auto; gap: 6px; align-items: center; }
-.exact-label {
-  grid-column: 1 / -1;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--fg-faint);
-}
-
-.year-input, .era-select {
-  padding: 8px 10px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-sm);
-  background: none;
-  font-variant-numeric: tabular-nums;
-}
-.year-input { width: 96px; text-align: center; font-size: 1rem; }
-.era-select { cursor: pointer; }
 
 /* ─────────────────────────────────────────────────────────  Rivelazione */
 
@@ -367,7 +383,8 @@
   border-top: 1px solid var(--rule);
 }
 .recap-text { font-family: var(--serif); font-size: 1.02rem; }
-.recap-years { font-size: 0.78rem; color: var(--fg-faint); }
+/* Riga di servizio: resta nel sans, ma gli anni affiancati vanno incolonnati. */
+.recap-years { font-size: 0.78rem; color: var(--fg-faint); font-variant-numeric: tabular-nums; }
 .recap-years b { color: var(--fg-dim); font-weight: 600; }
 .recap-points {
   grid-row: 1 / span 2;

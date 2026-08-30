@@ -77,14 +77,6 @@
 }
 .hud strong { color: var(--fg-dim); font-weight: 500; }
 
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-}
-
 .actions {
   display: flex;
   gap: 10px;
@@ -120,7 +112,6 @@
 .recap { width: 100%; text-align: left; }
 
 @media (max-width: 460px) {
-  .controls { flex-direction: column; align-items: stretch; }
   /* Con due bottoni affiancati su schermo stretto "Conferma l'anno" andrebbe
      a capo: si stringe l'imbottitura invece di accorciare le etichette. */
   .actions .btn { padding: 12px 10px; font-size: 0.9rem; }

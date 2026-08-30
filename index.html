@@ -63,7 +63,13 @@
     </article>
 
     <section class="panel" aria-label="Inserisci l'anno">
-      <output class="guess" id="guess-year">1800</output>
+      <!-- L'anno si legge e si scrive nello stesso punto: il campo è il titolo. -->
+      <div class="guess">
+        <input class="guess-year" id="guess-year" type="text" inputmode="numeric"
+               maxlength="4" autocomplete="off" aria-label="Anno scelto">
+        <button class="guess-era" id="guess-era" type="button" hidden
+                aria-label="Cambia era">d.C.</button>
+      </div>
 
       <div class="slider-wrap">
         <input class="slider" type="range" id="year-slider"
@@ -72,24 +78,13 @@
         <div class="ticks" id="slider-ticks" aria-hidden="true"></div>
       </div>
 
-      <div class="controls">
-        <div class="nudges" role="group" aria-label="Correggi l'anno">
-          <button class="btn-nudge" type="button" data-delta="-100">−100</button>
-          <button class="btn-nudge" type="button" data-delta="-10">−10</button>
-          <button class="btn-nudge" type="button" data-delta="-1">−1</button>
-          <button class="btn-nudge" type="button" data-delta="1">+1</button>
-          <button class="btn-nudge" type="button" data-delta="10">+10</button>
-          <button class="btn-nudge" type="button" data-delta="100">+100</button>
-        </div>
-
-        <div class="exact">
-          <label class="exact-label" for="year-input">Anno esatto</label>
-          <input class="year-input" type="number" id="year-input" inputmode="numeric" step="1">
-          <select class="era-select" id="year-era" aria-label="Era" hidden>
-            <option value="1">d.C.</option>
-            <option value="-1">a.C.</option>
-          </select>
-        </div>
+      <div class="nudges" role="group" aria-label="Correggi l'anno">
+        <button class="btn-nudge" type="button" data-delta="-100">−100</button>
+        <button class="btn-nudge" type="button" data-delta="-10">−10</button>
+        <button class="btn-nudge" type="button" data-delta="-1">−1</button>
+        <button class="btn-nudge" type="button" data-delta="1">+1</button>
+        <button class="btn-nudge" type="button" data-delta="10">+10</button>
+        <button class="btn-nudge" type="button" data-delta="100">+100</button>
       </div>
 
       <div class="actions">
@@ -125,7 +120,7 @@
     </div>
 
     <p class="reveal-stats" id="reveal-stats"></p>
-    <p class="hint-used" id="hint-used" hidden>Indizio usato: massimo 75 punti su questo round.</p>
+    <p class="hint-used" id="hint-used" hidden></p>
 
     <div class="note-block">
       <p class="note" id="reveal-note"></p>
@@ -140,7 +135,7 @@
   <!-- ═════════════════════════════════════════════════════════════ Risultati -->
   <section class="screen screen-results" id="screen-results" hidden>
     <p class="results-label">Partita finita</p>
-    <p class="final-score"><span id="final-points">0</span><span class="final-max">/500</span></p>
+    <p class="final-score"><span id="final-points">0</span><span class="final-max" id="final-max"></span></p>
     <h2 class="final-title" id="final-title">Buon conoscitore</h2>
     <p class="final-text" id="final-text"></p>
     <p class="record" id="final-record" hidden>Nuovo record personale!</p>

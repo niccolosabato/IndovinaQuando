@@ -107,14 +107,14 @@ button, input, select { font: inherit; color: inherit; }
 /* Gli anni sono l'elemento tipografico principale del gioco: qui il serif non è
    decorazione, è la gerarchia. Le cifre di Garamond sono oldstyle e di larghezza
    variabile, e l'anno salterebbe a ogni pixel di slider: si chiedono allineate. */
-.guess, .reveal-year, .final-score, .tl-tag, .recap-year {
+.guess, .reveal-year, .final-score, .tl-tag {
   font-family: var(--serif);
   font-variant-numeric: lining-nums tabular-nums;
   letter-spacing: -0.01em;
 }
 
 /* Etichette di servizio: piccole, spaziate, mai protagoniste. */
-.hud, .reveal-label, .results-label, .exact-label, .ticks, .tl-scale {
+.hud, .reveal-label, .results-label, .ticks, .tl-scale {
   font-family: var(--sans);
 }
 

@@ -28,21 +28,42 @@ Apri https://niccolosabato.github.io/IndovinaQuando/
 
 ### Come si inserisce l'anno
 
-Quattro modi, tutti sincronizzati fra loro:
+Tre modi, tutti sincronizzati fra loro, più la tastiera:
 
 1. lo **slider**, con le tacche delle epoche sotto;
-2. il campo **anno esatto**, con selettore a.C./d.C. nel livello Difficile;
+2. l'**anno grande** stesso: ci si scrive dentro. Nel livello Difficile accanto c'è
+   l'era, e si tocca per passare da d.C. ad a.C.;
 3. i pulsanti **−100 / −10 / −1 / +1 / +10 / +100**;
 4. la **tastiera**: `←` `→` per un anno, con `Maiusc` per dieci, `Invio` per confermare.
 
+L'anno si legge e si modifica nello stesso punto: prima il numero grande si limitava a
+mostrare quello che si era scelto altrove, ed era proprio quello su cui cadeva l'occhio.
+
 L'interfaccia non lo dice: le scorciatoie si scoprono provandole, e la riga che le
 elencava era l'ennesima istruzione da leggere prima di giocare.
+
+## Provarlo in locale
+
+```bash
+python3 serve.py        # http://localhost:8765
+```
+
+È `http.server` con in più `Cache-Control: no-store`, e la differenza non è un
+dettaglio: gli script si assumono a vicenda attraverso `window.IQ`, quindi basta che
+il browser si tenga un `js/ui.js` vecchio accanto a un `index.html` nuovo perché
+`bind()` si fermi a metà e i bottoni registrati dopo smettano di rispondere — senza
+un errore visibile, perché è già scattato al caricamento. Se dovesse succedere lo
+stesso, `cache()` ora lo scrive in console dicendo quale elemento manca.
+
+Aprire `index.html` con un doppio click funziona comunque, ma senza gli eventi da
+Wikipedia: da `file://` il browser vieta le richieste verso un'altra origine.
 
 ## Struttura
 
 ```
 IndovinaQuando/
 ├── index.html          pagina unica, quattro schermate
+├── serve.py            server di sviluppo, senza cache
 ├── assets/
 │   └── favicon.svg
 ├── css/

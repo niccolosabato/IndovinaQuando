@@ -23,22 +23,34 @@
   }
 
   function cache() {
+    var missing = [];
     [
       'screen-home', 'screen-round', 'screen-reveal', 'screen-results',
       'mode-list', 'mode-blurb', 'btn-start', 'btn-reset', 'btn-theme', 'fresh-count', 'best-line',
       'round-index', 'round-total-count', 'round-score',
       'event-text', 'hint-line',
-      'guess-year', 'year-slider', 'slider-ticks', 'year-input', 'year-era',
+      'guess-year', 'guess-era', 'year-slider', 'slider-ticks',
       'btn-hint', 'btn-confirm',
       'reveal-index', 'reveal-total-count', 'reveal-total', 'reveal-year', 'reveal-event',
       'tl-band', 'tl-guess', 'tl-actual', 'tl-guess-tag', 'tl-actual-tag', 'tl-min', 'tl-max',
       'reveal-stats', 'hint-used', 'reveal-note', 'reveal-source',
       'btn-next',
-      'final-points', 'final-title', 'final-text', 'final-record', 'recap',
+      'final-points', 'final-max', 'final-title', 'final-text', 'final-record', 'recap',
       'btn-again', 'btn-home'
     ].forEach(function (id) {
       el[id] = $(id);
+      if (!el[id]) missing.push(id);
     });
+
+    /* Un id che manca non si vede subito: bind() si interrompe sul primo elemento
+     * nullo e tutti i listener registrati dopo — Conferma, Indizio, i nudge — non
+     * vengono mai attaccati. I bottoni restano lì e non rispondono, e l'errore è
+     * già scorso via al caricamento. Meglio dirlo forte e chiaro. */
+    if (missing.length && global.console) {
+      global.console.error('IndovinaQuando: elementi non trovati nel DOM (' +
+        missing.join(', ') + '). index.html e js/ non sono allineati: ' +
+        'ricarica tenendo premuto Maiusc, o servi la pagina con `python3 serve.py`.');
+    }
   }
 
   function show(name) {
@@ -114,6 +126,12 @@
     el['btn-start'].textContent = on ? 'Carico eventi…' : 'Inizia partita';
   }
 
+  /* Vicolo cieco: nessun evento per questo livello. Si dice dov'era il conteggio,
+   * che in quel caso non avrebbe niente da contare. */
+  function noEvents() {
+    el['fresh-count'].textContent = 'Nessun evento disponibile per questo livello.';
+  }
+
   /* ──────────────────────────────────────────────────────────────── Round */
 
   function renderTicks(scale) {
@@ -144,29 +162,41 @@
     el['hint-line'].hidden = true;
     el['hint-line'].textContent = '';
     el['btn-hint'].disabled = false;
-    el['btn-hint'].textContent = 'Indizio (max 75 punti)';
+    el['btn-hint'].textContent = 'Indizio (max ' + hintMax() + ' punti)';
   }
 
-  /* Configura i controlli sul range della modalità (una volta per partita). */
+  /* Il tetto del round con l'indizio si deriva, non si riscrive a mano: era
+   * scritto «75» in tre punti diversi, che HINT_FACTOR poteva smentire. */
+  function hintMax() {
+    return Math.round(IQ.Config.MAX_ROUND_SCORE * IQ.Config.HINT_FACTOR);
+  }
+
+  /* Configura i controlli sul range della modalità (una volta per partita).
+   * L'etichetta dell'era serve solo dove la scala scende sotto lo zero. */
   function setupControls(scale) {
-    var bc = scale.min < 0;
     renderTicks(scale);
-    el['year-era'].hidden = !bc;
-    el['year-input'].min = bc ? 0 : scale.min;
-    el['year-input'].max = bc ? Math.max(Math.abs(scale.min), scale.max) : scale.max;
+    el['guess-era'].hidden = scale.min >= 0;
+  }
+
+  /* Il campo si stringe su quello che contiene, così il gruppo anno + era resta
+   * centrato invece di galleggiare in una casella larga quattro cifre. Le cifre
+   * sono tabular-nums, larghe esattamente come lo zero: un ch per carattere è la
+   * misura esatta, non una stima. */
+  function fitYearField(text) {
+    el['guess-year'].style.width = Math.max(1, text.length) + 'ch';
   }
 
   /* Riallinea tutti i controlli sull'anno corrente. */
   function syncGuess(year, scale) {
-    el['guess-year'].textContent = Scale.formatYear(year);
+    var bc = !el['guess-era'].hidden;
+    var text = String(bc ? Math.abs(year) : year);
+
+    el['guess-year'].value = text;
+    fitYearField(text);
+    if (bc) el['guess-era'].textContent = year < 0 ? 'a.C.' : 'd.C.';
+
     el['year-slider'].value = String(Math.round(scale.toPos(year) * 1000));
     el['year-slider'].setAttribute('aria-valuetext', Scale.formatYear(year));
-    if (!el['year-era'].hidden) {
-      el['year-era'].value = year < 0 ? '-1' : '1';
-      el['year-input'].value = String(Math.abs(year));
-    } else {
-      el['year-input'].value = String(year);
-    }
   }
 
   function showHint(text) {
@@ -204,6 +234,10 @@
       ' · <span class="points' + (r.points === 0 ? ' is-zero' : '') + '">' +
       r.points + '</span> punti';
     el['hint-used'].hidden = !r.usedHint;
+    if (r.usedHint) {
+      el['hint-used'].textContent =
+        'Indizio usato: massimo ' + hintMax() + ' punti su questo round.';
+    }
 
     /* Marcatori sulla striscia temporale. */
     var pg = r.scale.toPos(r.guess) * 100;
@@ -222,6 +256,7 @@
 
   function renderResults(res) {
     el['final-points'].textContent = res.total;
+    el['final-max'].textContent = '/' + IQ.Config.MAX_GAME_SCORE;
     el['final-title'].textContent = res.rating.title;
     el['final-text'].textContent = res.rating.text;
     el['final-record'].hidden = !res.isRecord;
@@ -262,9 +297,11 @@
     renderHomeMeta: renderHomeMeta,
     applyTheme: applyTheme,
     setLoading: setLoading,
+    noEvents: noEvents,
     renderRound: renderRound,
     setupControls: setupControls,
     syncGuess: syncGuess,
+    fitYearField: fitYearField,
     showHint: showHint,
     renderReveal: renderReveal,
     renderResults: renderResults
