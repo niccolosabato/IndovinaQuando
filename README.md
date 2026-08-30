@@ -14,6 +14,8 @@ Apri https://niccolosabato.github.io/IndovinaQuando/
 - L'anno esatto vale **100 punti**; poi il punteggio scende man mano che ci si allontana.
 - Il margine di errore concesso dipende dall'epoca (per un evento del 1969 sono
   pochi anni, per uno del 1750 a.C. molti di più) e dal livello scelto.
+- Fuori dal margine non si va subito a zero: resta una coda di punti che si
+  spegne a tre volte il margine, così azzeccare il secolo vale comunque qualcosa.
 - L'**indizio** rivela il secolo, ma abbassa il massimo di quel round a 75 punti.
 
 ### Livelli
@@ -100,8 +102,9 @@ si somigliano. Quello che arriva viene ripulito prima di entrare in gioco:
 
 - si scartano i testi troppo corti o troppo lunghi;
 - si scarta **qualsiasi testo che contenga un anno**, che regalerebbe la risposta;
-- la curiosità è il riassunto della voce Wikipedia collegata, preferendo la pagina
-  dedicata all'evento invece di quella generica;
+- la curiosità è la **prima frase intera** del riassunto della voce Wikipedia
+  collegata — preferendo la pagina dedicata all'evento invece di quella generica —
+  seguita dal link alla voce per chi vuole leggere il resto;
 - la categoria è dedotta dalle parole del testo.
 
 Gli eventi scaricati restano in cache su `localStorage` (fino a 600). I 197 eventi
@@ -126,11 +129,19 @@ parametro è la curiosità mostrata dopo la risposta.
 ```
 tolleranza = tolleranzaEpoca × moltiplicatoreLivello
 scarto     = |anno indovinato − anno reale|
-punti      = scarto = 0  →  100
-             scarto ≥ tolleranza  →  0
-             altrimenti  →  100 × (1 − scarto/tolleranza)^1.5
+punti      = scarto = 0             →  100
+             scarto < tolleranza    →  40 + 60 × (1 − scarto/tolleranza)^0,9
+             scarto < 3×tolleranza  →  40 × (1 − (scarto−tolleranza)/(2×tolleranza))
+             oltre                  →  0
 ```
+
+I due rami si saldano: sul limite della tolleranza valgono entrambi 40. Dentro il
+margine l'esponente è minore di 1, quindi gli errori piccoli costano poco; fuori
+resta una coda lineare che arriva a zero solo a tre volte il margine.
 
 Tolleranze per epoca: 15 anni dal 1900, 20 dal 1800, 30 dal 1500, 60 dal 1000,
 120 dall'anno 0, 250 per gli anni a.C. Moltiplicatori: ×2 Facile, ×1,4 Medio,
 ×1 Difficile.
+
+Nel livello Medio un evento del 1969 ha 21 anni di margine: 5 anni di scarto
+valgono 87 punti, 10 ne valgono 74, 21 ne valgono 40 e si arriva a zero a 63.

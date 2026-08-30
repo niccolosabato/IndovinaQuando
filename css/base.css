@@ -72,6 +72,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Il lampo azzurro al tocco è un comportamento da pagina di testo, non da
+   controllo di gioco: sullo slider si vedeva a ogni trascinamento. Il fuoco
+   resta segnalato da :focus-visible, più sotto. */
+html { -webkit-tap-highlight-color: transparent; }
+
 /* Grana della carta: appena percettibile, giusto per togliere alla pagina
    l'aspetto di fondo digitale. Una regola sola, facile da cancellare. */
 body::before {

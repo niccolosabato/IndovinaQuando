@@ -13,6 +13,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
+  touch-action: manipulation;   /* niente attesa del doppio tap */
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
@@ -43,6 +44,7 @@
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
+  touch-action: manipulation;
 }
 .btn-link:hover { color: var(--quill); }
 
@@ -64,6 +66,7 @@
   color: var(--fg-faint);
   font-size: 1rem;
   cursor: pointer;
+  touch-action: manipulation;
   border-bottom: 2px solid transparent;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
@@ -113,11 +116,21 @@
   font-size: clamp(2.6rem, 11vw, 3.4rem);
   line-height: 1;
   color: var(--quill);
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Slider ------------------------------------------------------------- */
 
-.slider-wrap { display: grid; gap: 8px; }
+/* Il trascinamento sul telefono è un gesto, non una lettura: qui dentro non si
+   seleziona testo e non si apre il menu contestuale. */
+.slider-wrap {
+  display: grid;
+  gap: 8px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
 
 .slider {
   -webkit-appearance: none;
@@ -127,6 +140,9 @@
   background: transparent;
   cursor: pointer;
   margin: 0;
+  /* pan-y e non none: lo slider è largo quanto la pagina e alto 34px, con none
+     una sfogliata verticale che parte da qui resterebbe bloccata. */
+  touch-action: pan-y;
 }
 .slider::-webkit-slider-runnable-track {
   height: 2px;
@@ -159,6 +175,10 @@
   font-size: 0.68rem;
   color: var(--fg-faint);
   font-variant-numeric: tabular-nums;
+  /* Decorazione pura (aria-hidden): non intercetta il tocco e non si seleziona. */
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .ticks span {
   position: absolute;
@@ -172,7 +192,13 @@
 
 /* Correzioni rapide e anno esatto ------------------------------------- */
 
-.nudges { display: flex; gap: 6px; flex-wrap: wrap; }
+.nudges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
 .btn-nudge {
   min-width: 46px;
@@ -184,6 +210,7 @@
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
+  touch-action: manipulation;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .btn-nudge:hover { border-color: var(--fg-faint); color: var(--fg); }
@@ -308,6 +335,19 @@
   text-wrap: balance;
 }
 .hint-used { color: var(--quill); }
+
+/* La curiosità è la prima frase della voce; chi vuole il resto lo trova qui. */
+.note-block { display: grid; gap: 6px; }
+
+.note-source {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--fg-faint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  touch-action: manipulation;
+}
+.note-source:hover { color: var(--quill); }
 
 /* ───────────────────────────────────────────────────────────  Riepilogo */
 

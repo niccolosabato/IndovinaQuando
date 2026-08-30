@@ -32,7 +32,7 @@
       'btn-hint', 'btn-confirm',
       'reveal-index', 'reveal-total-count', 'reveal-total', 'reveal-year', 'reveal-event',
       'tl-band', 'tl-guess', 'tl-actual', 'tl-guess-tag', 'tl-actual-tag', 'tl-min', 'tl-max',
-      'reveal-stats', 'hint-used', 'reveal-note',
+      'reveal-stats', 'hint-used', 'reveal-note', 'reveal-source',
       'btn-next',
       'final-points', 'final-title', 'final-text', 'final-record', 'recap',
       'btn-again', 'btn-home'
@@ -190,6 +190,12 @@
     el['reveal-year'].textContent = Scale.formatYear(r.event.year);
     el['reveal-event'].textContent = r.event.text;
     el['reveal-note'].textContent = r.event.note;
+
+    /* Il link c'è solo per gli eventi scaricati: quelli scritti a mano in
+     * data/events.js hanno già una curiosità loro e non rimandano a nessuna voce. */
+    var src = el['reveal-source'];
+    src.hidden = !r.event.url;
+    if (r.event.url) src.href = r.event.url;
 
     /* Verdetto, risposta, scarto e punti stanno in una riga sola: erano tre
      * riquadri più un badge per dire quattro cose corte. */

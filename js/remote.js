@@ -22,7 +22,8 @@
   var IQ = global.IQ || (global.IQ = {});
 
   var ENDPOINT = 'https://api.wikimedia.org/feed/v1/wikipedia/it/onthisday/events/';
-  var CACHE_KEY = 'iq.remote.v1';
+  var CACHE_KEY = 'iq.remote.v2';
+  var OLD_CACHE_KEYS = ['iq.remote.v1'];
   var CACHE_MAX = 600;      // eventi tenuti in cache: oltre, si tagliano i più vecchi
   var DAYS_PER_FETCH = 4;   // ~22 eventi grezzi a giorno
   var TIMEOUT_MS = 8000;
@@ -31,7 +32,8 @@
   var MONTH_DAYS = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   var MIN_TEXT = 20;
   var MAX_TEXT = 220;
-  var MAX_NOTE = 180;
+  var MIN_NOTE = 60;    // sotto questa lunghezza la frase è troppo scarna: se ne prende un'altra
+  var MAX_NOTE = 320;   // rete di sicurezza per le frasi fiume
 
   var events = [];      // eventi remoti disponibili, dal più vecchio in cache
   var index = {};       // id → true, per la deduplica
@@ -87,18 +89,51 @@
     return 'Storia';
   }
 
+  /* Un punto non chiude sempre la frase: gli estratti di Wikipedia sono pieni di
+   * iniziali puntate ("J. F. Kennedy") e di sigle ("a.C.", "sec.", "ecc."). La
+   * fine vera si riconosce dal contesto — punto, spazio, maiuscola — a patto di
+   * scartare questi due casi. */
+  var SENTENCE_END = /[.!?]["»']?\s+(?=[«"'(]?[A-ZÀ-Þ])/g;
+  var NOT_AN_END = /(?:^|[\s(«"'])(?:[A-Za-zÀ-ÿ]|a\.\s?C|d\.\s?C|ecc|sec|art|cfr|pag|vol|fig|op|ca|San|Sant|St|prof|dott|ing|avv)\.$/;
+
+  /* La prima frase intera dell'estratto: meglio poco e compiuto che 180
+   * caratteri mozzati a metà parola. */
+  function firstSentence(t) {
+    var re = new RegExp(SENTENCE_END.source, 'g');
+    var m;
+    while ((m = re.exec(t)) !== null) {
+      var head = t.slice(0, m.index + m[0].replace(/\s+$/, '').length);
+      if (NOT_AN_END.test(head)) continue;
+      /* Prima frase telegrafica ("È una città francese."): si tira avanti. */
+      if (head.length < MIN_NOTE) continue;
+      return head;
+    }
+    return t;
+  }
+
   /* La curiosità è mostrata solo dopo la rivelazione, quindi qui un anno non è
-   * uno spoiler: si taglia solo per lunghezza, alla fine di una frase. */
+   * uno spoiler. */
   function shortNote(extract, title) {
     var t = String(extract || '').replace(/\s+/g, ' ').trim();
     if (!t) return title ? 'Fonte: Wikipedia — ' + title + '.' : 'Fonte: Wikipedia.';
+
+    t = firstSentence(t);
     if (t.length <= MAX_NOTE) return t;
 
+    /* Frase fiume: si taglia a fine parola. Qui l'ellissi è onesta, perché sotto
+     * c'è il link alla voce per chi vuole il resto. */
     var cut = t.slice(0, MAX_NOTE);
-    var dot = cut.lastIndexOf('. ');
-    if (dot > 60) return cut.slice(0, dot + 1);
     var space = cut.lastIndexOf(' ');
-    return (space > 60 ? cut.slice(0, space) : cut) + '…';
+    return (space > MIN_NOTE ? cut.slice(0, space) : cut) + '…';
+  }
+
+  /* L'URL finisce dentro un href e ripassa dalla cache di localStorage, che
+   * chiunque può riscrivere: si accetta solo https, mai uno schema che esegua
+   * codice. */
+  function pageUrl(page) {
+    var urls = page && page.content_urls;
+    var u = (urls && urls.desktop && urls.desktop.page) || '';
+    return /^https:\/\//.test(u) ? u : '';
   }
 
   /* L'API elenca tutte le pagine citate e la prima non è per forza quella giusta:
@@ -136,7 +171,8 @@
       year: year,
       text: text,
       cat: guessCat(text, page.description),
-      note: shortNote(page.extract, title)
+      note: shortNote(page.extract, title),
+      url: pageUrl(page)
     };
   }
 
@@ -163,6 +199,11 @@
       index['local:' + IQ.EVENTS[i].id] = true;
     }
     try {
+      /* Le versioni precedenti della cache hanno note troncate e nessun link:
+       * si buttano invece di lasciarle in giro per altre 600 partite. */
+      for (i = 0; i < OLD_CACHE_KEYS.length; i++) {
+        global.localStorage.removeItem(OLD_CACHE_KEYS[i]);
+      }
       var raw = global.localStorage.getItem(CACHE_KEY);
       var data = raw ? JSON.parse(raw) : null;
       if (!data || Object.prototype.toString.call(data.events) !== '[object Array]') return;
