@@ -45,7 +45,7 @@ elencava era l'ennesima istruzione da leggere prima di giocare.
 ## Provarlo in locale
 
 ```bash
-python3 serve.py        # http://localhost:8765
+python3 server.py        # http://localhost:8765
 ```
 
 È `http.server` con in più `Cache-Control: no-store`, e la differenza non è un
@@ -63,7 +63,7 @@ Wikipedia: da `file://` il browser vieta le richieste verso un'altra origine.
 ```
 IndovinaQuando/
 ├── index.html          pagina unica, quattro schermate
-├── serve.py            server di sviluppo, senza cache
+├── server.py           server di sviluppo, senza cache
 ├── assets/
 │   └── favicon.svg
 ├── css/

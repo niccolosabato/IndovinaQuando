@@ -49,7 +49,7 @@
     if (missing.length && global.console) {
       global.console.error('IndovinaQuando: elementi non trovati nel DOM (' +
         missing.join(', ') + '). index.html e js/ non sono allineati: ' +
-        'ricarica tenendo premuto Maiusc, o servi la pagina con `python3 serve.py`.');
+        'ricarica tenendo premuto Maiusc, o servi la pagina con `python3 server.py`.');
     }
   }
 
