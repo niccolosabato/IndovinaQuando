@@ -217,6 +217,7 @@
     el['reveal-index'].textContent = roman(r.index + 1);
     el['reveal-total-count'].textContent = roman(IQ.Config.ROUNDS);
     el['reveal-total'].textContent = r.total;
+    el['btn-next'].textContent = r.isLast ? 'Vedi i risultati' : 'Prossimo round';
     el['reveal-year'].textContent = Scale.formatYear(r.event.year);
     el['reveal-event'].textContent = r.event.text;
     el['reveal-note'].textContent = r.event.note;

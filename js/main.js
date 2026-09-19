@@ -133,7 +133,8 @@
       total: state.total,
       usedHint: state.usedHint,
       verdict: IQ.Scoring.verdict(points, diff),
-      scale: state.scale
+      scale: state.scale,
+      isLast: state.index >= state.deck.length - 1
     });
     UI.show('reveal');
   }
